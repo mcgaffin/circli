@@ -32,7 +32,9 @@ defmodule CircleApi do
     IO.puts("     committed: #{first_build["committer_date"]}")
     IO.puts("commit message: #{first_build["subject"]}")
     IO.puts("============================================================")
-    Enum.each(Enum.uniq(Enum.reverse(results)), fn r -> IO.puts(r) end)
+
+    results |> Enum.uniq |> Enum.reverse |> Enum.each(fn r -> IO.puts(r) end)
+
     IO.puts ""
   end
 end
