@@ -12,10 +12,6 @@ defmodule Circli do
       :world
 
   """
-  def hello do
-    :world
-  end
-
   defp parse_args(args) do
     {options, _, _} = OptionParser.parse(args,
       switches: [foo: :string]
@@ -32,7 +28,8 @@ defmodule Circli do
   end
 
   def main(args) do
-    IO.puts "This is Circli"
-    args |> parse_args |> process
+    # args |> parse_args |> process
+
+    Circle.fetch_status
   end
 end
