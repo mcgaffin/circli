@@ -21,11 +21,19 @@ defmodule CircleApi do
     build_info
   end
 
-  def fetch_build_results do
+  def fetch_build_summary do
     build_status = fetch_status()
     results = Enum.map(build_status,
       fn build -> "#{build["build_parameters"]["CIRCLE_JOB"]} => #{build["outcome"]}" end)
-    Enum.each(Enum.uniq(Enum.sort(results)), fn r -> IO.puts(r) end)
+
+    first_build = Enum.at(build_status, 0)
+    IO.puts ""
+    IO.puts("============================================================")
+    IO.puts("     committed: #{first_build["committer_date"]}")
+    IO.puts("commit message: #{first_build["subject"]}")
+    IO.puts("============================================================")
+    Enum.each(Enum.uniq(Enum.reverse(results)), fn r -> IO.puts(r) end)
+    IO.puts ""
   end
 end
 

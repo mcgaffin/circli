@@ -30,6 +30,6 @@ defmodule Circli do
   def main(args) do
     # args |> parse_args |> process
 
-    Circle.fetch_status
+    CircleApi.fetch_build_summary
   end
 end
