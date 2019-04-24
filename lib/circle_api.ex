@@ -24,7 +24,7 @@ defmodule CircleApi do
   def fetch_build_summary do
     build_status = fetch_status()
     results = Enum.map(build_status,
-      fn build -> "#{build["build_parameters"]["CIRCLE_JOB"]} => #{build["outcome"]}" end)
+      fn build -> "#{build["build_parameters"]["CIRCLE_JOB"]} => #{build["status"]}" end)
 
     first_build = Enum.at(build_status, 0)
     IO.puts ""
