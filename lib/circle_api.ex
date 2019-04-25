@@ -1,4 +1,6 @@
 defmodule CircleApi do
+  use Timex
+
   def fetch_me do
     circle_url = "https://circle2.bubtools.net/api/v1.1/me"
     circle_token = "a598c3e26d9b3bbf0fe1d44a1a045236e2522f77"
@@ -13,6 +15,7 @@ defmodule CircleApi do
   defp fetch_status(branch_name) do
     circle_url = "https://circle2.bubtools.net/api/v1.1/project/github/BookBub/lello/tree/#{branch_name}"
     circle_token = "a598c3e26d9b3bbf0fe1d44a1a045236e2522f77"
+
     response = HTTPotion.get(circle_url,
       query: %{"circle-token" => circle_token},
       headers: %{accept: "application/json"})
@@ -38,10 +41,12 @@ defmodule CircleApi do
     results = build_status |> removeSuccessStates |> gather_build_state_messages
 
     first_build = Enum.at(build_status, 0)
+    committer_date = Timex.parse!(first_build["start_time"], "{ISO:Extended}")
+
     IO.puts ""
     IO.puts("------------------------------------------------------------")
     IO.puts("        branch: #{branch_name}")
-    IO.puts("     committed: #{first_build["committer_date"]}")
+    IO.puts("     committed: #{Timex.format!(committer_date, "{relative}", :relative)}")
     IO.puts("commit message: #{first_build["subject"]}")
     IO.puts("------------------------------------------------------------")
 
