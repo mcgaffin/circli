@@ -62,6 +62,17 @@ defmodule Circli.CircleApi do
     }
   end
 
+  defp print_build_messages([]) do
+    IO.puts("build succeeded")
+  end
+
+  defp print_build_messages(messages) do
+    messages
+    |> Enum.uniq
+    |> Enum.reverse
+    |> Enum.each(fn r -> IO.puts(r) end)
+  end
+
   def print_build_summary(branch_name) do
     results = generate_build_results(branch_name)
 
@@ -73,16 +84,7 @@ defmodule Circli.CircleApi do
     IO.puts("     committed: #{Timex.format!(results[:commit_date], "{relative}", :relative)}")
     IO.puts("commit message: #{results[:commit_message]}")
     IO.puts(border)
-
-    if Enum.empty?(results[:messages]) do
-      IO.puts("build succeeded")
-    else
-      results[:messages]
-      |> Enum.uniq
-      |> Enum.reverse
-      |> Enum.each(fn r -> IO.puts(r) end)
-    end
-
+    print_build_messages(results[:messages])
     IO.puts ""
   end
 end
