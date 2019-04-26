@@ -2,16 +2,19 @@
 
 ## Description
 This is a simple cli for getting workflow build information from Circle 2 via
-the API. For now, it really only does that. It might be nice to be able to retry
-a build or something like that, but that's not today's news.
+the API. For now, it really only does that. Also, it really only does that with Lello.
+It might be nice to be able to retry a build or something like that, but that's not today's news.
 
 See [#Project Notes] for more information about my ideas for this project.
 
+## Installing
+```sh
+> mix do escript.build, escript.install
+```
 ## Running
 
 ```sh
-> mix escript.build
-> ./circli --name=Philo
+> ./circli <lello-branch-name>
 ```
 
 ## Project Notes
@@ -76,23 +79,3 @@ Sample output is in Insomnia
 * names of running jobs 
 * names of failed jobs
 * duration of workflow
-
----
-
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `circli` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:circli, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/circli](https://hexdocs.pm/circli).
-
