@@ -17,7 +17,11 @@ defmodule Circli.CircleApi do
     circle_token = "a598c3e26d9b3bbf0fe1d44a1a045236e2522f77"
 
     response = HTTPotion.get(circle_url,
-      query: %{"circle-token" => circle_token},
+      query: %{
+        "circle-token" => circle_token,
+        limit: 15,
+        shallow: true,
+      },
       headers: %{accept: "application/json"})
 
     {_, build_info} = Poison.decode(response.body)
@@ -31,29 +35,41 @@ defmodule Circli.CircleApi do
   defp gather_build_state_messages(builds) do
     Enum.map(builds,
       fn build ->
-        "#{build["build_parameters"]["CIRCLE_JOB"]} => #{build["status"]}"
+        "#{build["workflows"]["job_name"]} => #{build["status"]}"
       end)
   end
 
   def print_build_summary(branch_name) do
-    build_status = fetch_status(branch_name)
+    build_states = fetch_status(branch_name)
 
-    results = build_status |> removeSuccessStates |> gather_build_state_messages
+    results = build_states
+              |> removeSuccessStates
+              |> gather_build_state_messages
 
-    first_build = Enum.at(build_status, 0)
-    committer_date = Timex.parse!(first_build["start_time"], "{ISO:Extended}")
+    committer_date = build_states
+                     |> Enum.find(fn build -> build["committer_date"] != nil end)
+                     |> Map.get("committer_date")
+                     |> Timex.parse!("{ISO:Extended}")
+
+    subject = build_states
+              |> Enum.find(fn build -> build["subject"] != nil end)
+              |> Map.get("subject")
+
 
     IO.puts ""
     IO.puts("------------------------------------------------------------")
     IO.puts("        branch: #{branch_name}")
     IO.puts("     committed: #{Timex.format!(committer_date, "{relative}", :relative)}")
-    IO.puts("commit message: #{first_build["subject"]}")
+    IO.puts("commit message: #{subject}")
     IO.puts("------------------------------------------------------------")
 
     if Enum.empty?(results) do
       IO.puts("build succeeded")
     else
-      results |> Enum.uniq |> Enum.reverse |> Enum.each(fn r -> IO.puts(r) end)
+      results
+      |> Enum.uniq
+      |> Enum.reverse
+      |> Enum.each(fn r -> IO.puts(r) end)
     end
 
     IO.puts ""
