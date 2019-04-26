@@ -30,6 +30,6 @@ defmodule Circli do
   def main(args) do
     # args |> parse_args |> process
 
-    CircleApi.fetch_build_summary
+    CircleApi.print_build_summary(Enum.at(args, 0))
   end
 end
