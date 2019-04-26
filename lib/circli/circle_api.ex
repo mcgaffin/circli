@@ -39,34 +39,43 @@ defmodule Circli.CircleApi do
       end)
   end
 
-  def print_build_summary(branch_name) do
+  def generate_build_results(branch_name) do 
     build_states = fetch_status(branch_name)
 
-    results = build_states
+    messages = build_states
               |> removeSuccessStates
               |> gather_build_state_messages
 
-    committer_date = build_states
-                     |> Enum.find(fn build -> build["committer_date"] != nil end)
-                     |> Map.get("committer_date")
-                     |> Timex.parse!("{ISO:Extended}")
+    commit_date = build_states
+                  |> Enum.find(fn build -> build["committer_date"] != nil end)
+                  |> Map.get("committer_date")
+                  |> Timex.parse!("{ISO:Extended}")
 
-    subject = build_states
-              |> Enum.find(fn build -> build["subject"] != nil end)
-              |> Map.get("subject")
+    commit_message = build_states
+                     |> Enum.find(fn build -> build["subject"] != nil end)
+                     |> Map.get("subject")
 
+    %{
+      messages: messages,
+      commit_date: commit_date,
+      commit_message: commit_message,
+    }
+  end
+
+  def print_build_summary(branch_name) do
+    results = generate_build_results(branch_name)
 
     IO.puts ""
     IO.puts("------------------------------------------------------------")
     IO.puts("        branch: #{branch_name}")
-    IO.puts("     committed: #{Timex.format!(committer_date, "{relative}", :relative)}")
-    IO.puts("commit message: #{subject}")
+    IO.puts("     committed: #{Timex.format!(results[:commit_date], "{relative}", :relative)}")
+    IO.puts("commit message: #{results[:commit_message]}")
     IO.puts("------------------------------------------------------------")
 
-    if Enum.empty?(results) do
+    if Enum.empty?(results[:messages]) do
       IO.puts("build succeeded")
     else
-      results
+      results[:messages]
       |> Enum.uniq
       |> Enum.reverse
       |> Enum.each(fn r -> IO.puts(r) end)
