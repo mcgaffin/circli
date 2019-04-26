@@ -65,12 +65,14 @@ defmodule Circli.CircleApi do
   def print_build_summary(branch_name) do
     results = generate_build_results(branch_name)
 
+    border = String.duplicate("-", Enum.max([50, String.length(results[:commit_message]) + 16]))
+
     IO.puts ""
-    IO.puts("------------------------------------------------------------")
+    IO.puts(border)
     IO.puts("        branch: #{branch_name}")
     IO.puts("     committed: #{Timex.format!(results[:commit_date], "{relative}", :relative)}")
     IO.puts("commit message: #{results[:commit_message]}")
-    IO.puts("------------------------------------------------------------")
+    IO.puts(border)
 
     if Enum.empty?(results[:messages]) do
       IO.puts("build succeeded")
