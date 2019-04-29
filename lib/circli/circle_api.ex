@@ -19,7 +19,7 @@ defmodule Circli.CircleApi do
     response = HTTPotion.get(circle_url,
       query: %{
         "circle-token" => circle_token,
-        limit: 15,
+        limit: 60,
         shallow: true,
       },
       headers: %{accept: "application/json"})
@@ -39,8 +39,18 @@ defmodule Circli.CircleApi do
       end)
   end
 
+  defp first_lello_workflow(builds) do
+    most_recent_build = builds
+                        |> Enum.reject(fn build -> build["committer_date"] === nil end)
+                        |> Enum.at(0)
+
+    workflow_id = most_recent_build["workflows"]["workflow_id"]
+    Enum.reject(builds, fn build -> build["workflows"]["workflow_id"] != workflow_id end)
+  end
+
   def generate_build_results(branch_name) do 
     build_states = fetch_status(branch_name)
+                   |> first_lello_workflow
 
     messages = build_states
               |> removeSuccessStates
