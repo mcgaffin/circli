@@ -35,7 +35,7 @@ defmodule Circli.CircleApi do
   defp gather_build_state_messages(builds) do
     Enum.map(builds,
       fn build ->
-        "#{build["workflows"]["job_name"]} => #{build["status"]}"
+        "#{build["workflows"]["job_name"]}: #{build["status"]}"
       end)
   end
 
@@ -79,14 +79,15 @@ defmodule Circli.CircleApi do
   end
 
   defp print_build_messages([]) do
-    IO.puts("build succeeded")
+    IO.puts("✅  build succeeded")
   end
 
   defp print_build_messages(messages) do
+    IO.puts("⚙️  running builds")
     messages
     |> Enum.uniq
     |> Enum.reverse
-    |> Enum.each(fn r -> IO.puts(r) end)
+    |> Enum.each(fn r -> IO.puts("- #{r}") end)
   end
 
   def print_build_summary(branch_name) do
@@ -101,6 +102,7 @@ defmodule Circli.CircleApi do
     IO.puts("        queued: #{Timex.format!(results[:queued_at], "{relative}", :relative)}")
     IO.puts("commit message: #{results[:commit_message]}")
     IO.puts(border)
+    IO.puts ""
     print_build_messages(results[:messages])
     IO.puts ""
   end
