@@ -35,7 +35,7 @@ defmodule Circli.CircleApi do
   defp gather_build_state_messages(builds) do
     Enum.map(builds,
       fn build ->
-        "#{build["workflows"]["job_name"]} => #{build["status"]}"
+        "#{build["workflows"]["job_name"]}: #{build["status"]}"
       end)
   end
 
@@ -56,6 +56,11 @@ defmodule Circli.CircleApi do
               |> removeSuccessStates
               |> gather_build_state_messages
 
+    queued_at = build_states
+                 |> Enum.reduce(Timex.now, fn build, earliest_dt ->
+                   build_dt = Timex.parse!(build["queued_at"], "{ISO:Extended}")
+                   if Timex.compare(build_dt, earliest_dt) === -1, do: build_dt, else: earliest_dt end)
+
     commit_date = build_states
                   |> Enum.find(fn build -> build["committer_date"] != nil end)
                   |> Map.get("committer_date")
@@ -67,20 +72,22 @@ defmodule Circli.CircleApi do
 
     %{
       messages: messages,
-      commit_date: commit_date,
+      committed_at: commit_date,
+      queued_at: queued_at,
       commit_message: commit_message,
     }
   end
 
   defp print_build_messages([]) do
-    IO.puts("build succeeded")
+    IO.puts("✅  build succeeded")
   end
 
   defp print_build_messages(messages) do
+    IO.puts("⚙️  running builds")
     messages
     |> Enum.uniq
     |> Enum.reverse
-    |> Enum.each(fn r -> IO.puts(r) end)
+    |> Enum.each(fn r -> IO.puts("- #{r}") end)
   end
 
   def print_build_summary(branch_name) do
@@ -91,9 +98,11 @@ defmodule Circli.CircleApi do
     IO.puts ""
     IO.puts(border)
     IO.puts("        branch: #{branch_name}")
-    IO.puts("     committed: #{Timex.format!(results[:commit_date], "{relative}", :relative)}")
+    IO.puts("     committed: #{Timex.format!(results[:committed_at], "{relative}", :relative)}")
+    IO.puts("        queued: #{Timex.format!(results[:queued_at], "{relative}", :relative)}")
     IO.puts("commit message: #{results[:commit_message]}")
     IO.puts(border)
+    IO.puts ""
     print_build_messages(results[:messages])
     IO.puts ""
   end
