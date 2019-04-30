@@ -48,6 +48,11 @@ defmodule Circli.CircleApi do
     Enum.reject(builds, fn build -> build["workflows"]["workflow_id"] != workflow_id end)
   end
 
+  def first_queued_build(build, earliest_dt) do
+    build_dt = Timex.parse!(build["queued_at"], "{ISO:Extended}")
+    if Timex.compare(build_dt, earliest_dt) === -1, do: build_dt, else: earliest_dt
+  end
+
   def generate_build_results(branch_name) do 
     build_states = fetch_status(branch_name)
                    |> first_lello_workflow
@@ -56,11 +61,7 @@ defmodule Circli.CircleApi do
               |> removeSuccessStates
               |> gather_build_state_messages
 
-    queued_at = build_states
-                |> Enum.reduce(Timex.now, fn build, earliest_dt ->
-                  build_dt = Timex.parse!(build["queued_at"], "{ISO:Extended}")
-                  if Timex.compare(build_dt, earliest_dt) === -1, do: build_dt, else: earliest_dt
-                end)
+    queued_at = build_states |> Enum.reduce(Timex.now, &first_queued_build/2)
 
     commit_date = build_states
                   |> Enum.find(fn build -> build["committer_date"] != nil end)
