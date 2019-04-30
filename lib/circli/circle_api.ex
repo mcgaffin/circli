@@ -3,7 +3,7 @@ defmodule Circli.CircleApi do
 
   def fetch_me do
     circle_url = "https://circle2.bubtools.net/api/v1.1/me"
-    circle_token = "a598c3e26d9b3bbf0fe1d44a1a045236e2522f77"
+    circle_token = Application.get_env(:circli, :circle2_api_key)
     response = HTTPotion.get(circle_url,
       query: %{"circle-token" => circle_token},
       headers: %{accept: "application/json"})
@@ -14,7 +14,7 @@ defmodule Circli.CircleApi do
 
   defp fetch_status(branch_name) do
     circle_url = "https://circle2.bubtools.net/api/v1.1/project/github/BookBub/lello/tree/#{branch_name}"
-    circle_token = "a598c3e26d9b3bbf0fe1d44a1a045236e2522f77"
+    circle_token = Application.get_env(:circli, :circle2_api_key)
 
     response = HTTPotion.get(circle_url,
       query: %{

@@ -28,3 +28,8 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env()}.exs"
+#
+
+config :circli, circle1_projects: ["templater", "hedwig"]
+
+config :circli, circle2_projects: ["lello"]
