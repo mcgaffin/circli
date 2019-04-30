@@ -1,6 +1,11 @@
 defmodule Circli.CircleApi do
   use Timex
 
+  @doc """
+  Returns information about you, the current user. The returned information
+  is based on the API key that you provide.
+
+  """
   def fetch_me do
     circle_url = "https://circle2.bubtools.net/api/v1.1/me"
     circle_token = Application.get_env(:circli, :circle2_api_key)
@@ -80,10 +85,22 @@ defmodule Circli.CircleApi do
     }
   end
 
+  @doc """
+  Given an empty array, prints a success message for the workflow. 
+  """
   def print_build_messages([]) do
     IO.puts("✅  build succeeded")
   end
 
+  @doc """
+  Given a list of build messages, prints a header followed by a message for
+  each message. Each message should represent a build that is either:
+    * queued
+    * in-progress
+    * failed
+
+  Builds that have succeeded should not be listed here.
+  """
   def print_build_messages(messages) do
     IO.puts("⚙️  running builds")
     messages
@@ -91,6 +108,14 @@ defmodule Circli.CircleApi do
     |> Enum.each(fn r -> IO.puts("- #{r}") end)
   end
 
+  @doc """
+  Prints a summary of the status of the latest build on the given branch. This currently
+  supports workflows on Circle 2. Workflows are essentially a collection of builds triggered
+  by one commit.
+
+  Example:
+    print_build_summary("master")
+  """
   def print_build_summary(branch_name) do
     results = generate_build_results(branch_name)
 
