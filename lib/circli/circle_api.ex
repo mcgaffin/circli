@@ -57,9 +57,10 @@ defmodule Circli.CircleApi do
               |> gather_build_state_messages
 
     queued_at = build_states
-                 |> Enum.reduce(Timex.now, fn build, earliest_dt ->
-                   build_dt = Timex.parse!(build["queued_at"], "{ISO:Extended}")
-                   if Timex.compare(build_dt, earliest_dt) === -1, do: build_dt, else: earliest_dt end)
+                |> Enum.reduce(Timex.now, fn build, earliest_dt ->
+                  build_dt = Timex.parse!(build["queued_at"], "{ISO:Extended}")
+                  if Timex.compare(build_dt, earliest_dt) === -1, do: build_dt, else: earliest_dt
+                end)
 
     commit_date = build_states
                   |> Enum.find(fn build -> build["committer_date"] != nil end)
