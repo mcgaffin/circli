@@ -80,14 +80,13 @@ defmodule Circli.CircleApi do
     }
   end
 
-  defp print_build_messages([]) do
+  def print_build_messages([]) do
     IO.puts("✅  build succeeded")
   end
 
-  defp print_build_messages(messages) do
+  def print_build_messages(messages) do
     IO.puts("⚙️  running builds")
     messages
-    |> Enum.uniq
     |> Enum.reverse
     |> Enum.each(fn r -> IO.puts("- #{r}") end)
   end
