@@ -39,7 +39,14 @@ defmodule Circli.CircleApi do
       end)
   end
 
-  defp first_lello_workflow(builds) do
+  defp first_workflow([]) do
+    IO.puts("")
+    IO.puts("There are no builds on this branch yet. Get busy!")
+    IO.puts("")
+    []
+  end
+
+  defp first_workflow(builds) do
     most_recent_build = builds
                         |> Enum.reject(fn build -> build["committer_date"] === nil end)
                         |> Enum.at(0)
@@ -53,10 +60,11 @@ defmodule Circli.CircleApi do
     if Timex.compare(build_dt, earliest_dt) === -1, do: build_dt, else: earliest_dt
   end
 
-  def generate_build_results(branch_name) do 
-    build_states = fetch_status(branch_name)
-                   |> first_lello_workflow
+  def gather_build_info([]) do
+    %{}
+  end
 
+  def gather_build_info(build_states) do
     messages = build_states
               |> removeSuccessStates
               |> gather_build_state_messages
@@ -65,7 +73,7 @@ defmodule Circli.CircleApi do
 
     commit_date = build_states
                   |> Enum.find(fn build -> build["committer_date"] != nil end)
-                  |> Map.get("committer_date")
+                  |> Map.get("committer_date", "")
                   |> Timex.parse!("{ISO:Extended}")
 
     commit_message = build_states
@@ -78,6 +86,13 @@ defmodule Circli.CircleApi do
       queued_at: queued_at,
       commit_message: commit_message,
     }
+  end
+
+  def generate_build_results(branch_name) do 
+    build_states = fetch_status(branch_name)
+                   |> first_workflow
+
+    gather_build_info(build_states)
   end
 
   defp print_build_messages([]) do
@@ -95,18 +110,20 @@ defmodule Circli.CircleApi do
   def print_build_summary(branch_name) do
     results = generate_build_results(branch_name)
 
-    border = String.duplicate("-", Enum.max([50, String.length(results[:commit_message]) + 16]))
+    unless Enum.empty?(results) do
+      border = String.duplicate("-", Enum.max([50, String.length(results[:commit_message]) + 16]))
 
-    IO.puts ""
-    IO.puts(border)
-    IO.puts("        branch: #{branch_name}")
-    IO.puts("     committed: #{Timex.format!(results[:committed_at], "{relative}", :relative)}")
-    IO.puts("        queued: #{Timex.format!(results[:queued_at], "{relative}", :relative)}")
-    IO.puts("commit message: #{results[:commit_message]}")
-    IO.puts(border)
-    IO.puts ""
-    print_build_messages(results[:messages])
-    IO.puts ""
+      IO.puts ""
+      IO.puts(border)
+      IO.puts("        branch: #{branch_name}")
+      IO.puts("     committed: #{Timex.format!(results[:committed_at], "{relative}", :relative)}")
+      IO.puts("        queued: #{Timex.format!(results[:queued_at], "{relative}", :relative)}")
+      IO.puts("commit message: #{results[:commit_message]}")
+      IO.puts(border)
+      IO.puts ""
+      print_build_messages(results[:messages])
+      IO.puts ""
+    end
   end
 end
 
