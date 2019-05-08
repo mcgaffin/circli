@@ -100,11 +100,10 @@ defmodule Circli.CircleApi do
   end
 
   defp print_build_messages(messages) do
-    IO.puts("⚙️  running builds")
     messages
     |> Enum.uniq
     |> Enum.reverse
-    |> Enum.each(fn r -> IO.puts("- #{r}") end)
+    |> Enum.each(fn r -> IO.puts("⚙️  #{r}") end)
   end
 
   def print_build_summary(branch_name) do
