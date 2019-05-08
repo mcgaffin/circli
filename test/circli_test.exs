@@ -1,6 +1,7 @@
 defmodule CircliTest do
   use ExUnit.Case
   doctest Circli.CLI
+  doctest Circli.Util
 
   import Circli.CLI, only: [ parse_args: 1 ]
 
