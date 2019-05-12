@@ -1,4 +1,4 @@
-defmodule Circli.CircleApi do
+defmodule Circli.Circle2Api do
   use Timex
 
   def fetch_me do
@@ -12,8 +12,8 @@ defmodule Circli.CircleApi do
     me_info
   end
 
-  defp fetch_status(branch_name) do
-    circle_url = "https://circle2.bubtools.net/api/v1.1/project/github/BookBub/lello/tree/#{branch_name}"
+  defp fetch_status({ organization, repo, branch_name }) do
+    circle_url = "https://circle2.bubtools.net/api/v1.1/project/github/#{organization}/#{repo}/tree/#{branch_name}"
     circle_token = Application.get_env(:circli, :circle2_api_key)
 
     response = HTTPotion.get(circle_url,
@@ -88,8 +88,8 @@ defmodule Circli.CircleApi do
     }
   end
 
-  def generate_build_results(branch_name) do 
-    build_states = fetch_status(branch_name)
+  def generate_build_results(build_info) do 
+    build_states = fetch_status(build_info)
                    |> first_workflow
 
     gather_build_info(build_states)
@@ -106,14 +106,43 @@ defmodule Circli.CircleApi do
     |> Enum.each(fn r -> IO.puts("⚙️  #{r}") end)
   end
 
-  def print_build_summary(branch_name) do
-    results = generate_build_results(branch_name)
+  defp validate_build_info({ organization, repo, branch }) do
+    organization = if(organization == nil or String.length(organization) == 0, do: "bookbub", else: organization)
+    repo = if(repo == nil or String.length(repo) == 0, do: "lello", else: repo)
+    branch = if(branch == nil or String.length(branch) == 0, do: "master", else: branch)
+    { organization, repo, branch }
+  end
+
+  def print_build_summary({}) do
+    print_build_summary({ nil, nil, nil })
+  end
+
+  def print_build_summary({ nil, repo, branch }) do
+    {org, _} = Circli.Util.git_repo_info()
+    print_build_summary({ org, repo, branch })
+  end
+
+  def print_build_summary({ org, nil, branch }) do
+    {_, repo} = Circli.Util.git_repo_info()
+    print_build_summary({ org, repo, branch })
+  end
+
+  def print_build_summary({ org, repo, nil }) do
+    print_build_summary({ org, repo, Circli.Util.current_branch() })
+  end
+
+  def print_build_summary(build_info) do
+    results = build_info
+              |> validate_build_info
+              |> generate_build_results
 
     unless Enum.empty?(results) do
       border = String.duplicate("-", Enum.max([50, String.length(results[:commit_message]) + 16]))
 
+      { org, repo, branch_name } = build_info
       IO.puts ""
       IO.puts(border)
+      IO.puts("          repo: #{org}/#{repo}")
       IO.puts("        branch: #{branch_name}")
       IO.puts("     committed: #{Timex.format!(results[:committed_at], "{relative}", :relative)}")
       IO.puts("        queued: #{Timex.format!(results[:queued_at], "{relative}", :relative)}")

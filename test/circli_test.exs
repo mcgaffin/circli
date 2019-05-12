@@ -1,6 +1,7 @@
 defmodule CircliTest do
   use ExUnit.Case
   doctest Circli.CLI
+  doctest Circli.Util
 
   import Circli.CLI, only: [ parse_args: 1 ]
 
@@ -9,7 +10,21 @@ defmodule CircliTest do
     assert parse_args(["--help", "anything"]) == :help
   end
 
-  test "parses branch name" do
-    assert parse_args(["this-is-my-branch-name"]) == { "this-is-my-branch-name" }
+  test "parses build arguments" do
+    assert parse_args([
+      "-o", "org-name",
+      "-r", "repo-name",
+      "-b", "this-is-my-branch-name"
+    ]) == { "org-name", "repo-name", "this-is-my-branch-name" }
+
+    assert parse_args([
+      "--organization=org-name",
+      "--repo=repo-name",
+      "--branch=this-is-my-branch-name"
+    ]) == { "org-name", "repo-name", "this-is-my-branch-name" }
+  end
+
+  test "when passed nothing, returns nothing" do
+    assert(parse_args([]) == {})
   end
 end

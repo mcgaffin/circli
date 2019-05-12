@@ -12,14 +12,14 @@ defmodule Circli.CLI do
   defp process(:help) do
     IO.puts """
 
-      Usage: circli <lello-branch-name>
+      Usage: circli [-o organization ] [-r repo] [-b branch]
 
     """
     System.halt(0)
   end
 
-  defp process({ branch_name }) do
-    Circli.CircleApi.print_build_summary(branch_name)
+  defp process(build_info) do
+    Circli.Circle2Api.print_build_summary(build_info)
   end
 
   @doc """
@@ -29,12 +29,22 @@ defmodule Circli.CLI do
   Prints a build summary for the latest commit of the provided branch.
   """
   def parse_args(argv) do
-    parse = OptionParser.parse(argv, switches: [ help: :boolean], aliases: [ h: :help ])
+    parse = OptionParser.parse(argv, switches: [
+      help: :boolean,
+      organization: :string,
+      repo: :string,
+      branch: :string,
+    ], aliases: [
+      h: :help,
+      o: :organization,
+      r: :repo,
+      b: :branch,
+    ])
+
     case parse do
-      { [ help: true ], _, _ }
-      -> :help
-        { _, [ branch_name ], _ }
-        -> { branch_name }
+      { [ help: true ], _, _ } -> :help
+      { [], _, _} -> {}
+      { switches, _, _ } -> { switches[:organization], switches[:repo], switches[:branch] }
       _ -> :help
     end
   end
