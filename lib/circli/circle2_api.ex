@@ -12,8 +12,8 @@ defmodule Circli.Circle2Api do
     me_info
   end
 
-  defp fetch_status(branch_name) do
-    circle_url = "https://circle2.bubtools.net/api/v1.1/project/github/BookBub/lello/tree/#{branch_name}"
+  defp fetch_status({ organization, repo, branch_name }) do
+    circle_url = "https://circle2.bubtools.net/api/v1.1/project/github/#{organization}/#{repo}/tree/#{branch_name}"
     circle_token = Application.get_env(:circli, :circle2_api_key)
 
     response = HTTPotion.get(circle_url,
@@ -88,8 +88,8 @@ defmodule Circli.Circle2Api do
     }
   end
 
-  def generate_build_results(branch_name) do 
-    build_states = fetch_status(branch_name)
+  def generate_build_results(build_info) do 
+    build_states = fetch_status(build_info)
                    |> first_workflow
 
     gather_build_info(build_states)
@@ -106,12 +106,18 @@ defmodule Circli.Circle2Api do
     |> Enum.each(fn r -> IO.puts("⚙️  #{r}") end)
   end
 
-  def print_build_summary(branch_name) do
-    results = generate_build_results(branch_name)
+  def print_build_summary do
+    Circli.Util.git_repo_name
+    |> print_build_summary
+  end
+
+  def print_build_summary(build_info) do
+    results = generate_build_results(build_info)
 
     unless Enum.empty?(results) do
       border = String.duplicate("-", Enum.max([50, String.length(results[:commit_message]) + 16]))
 
+      { _org, _repo, branch_name } = build_info
       IO.puts ""
       IO.puts(border)
       IO.puts("        branch: #{branch_name}")
