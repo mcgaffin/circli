@@ -118,12 +118,12 @@ defmodule Circli.Circle2Api do
   end
 
   def print_build_summary({ nil, repo, branch }) do
-    {org, _} = Circli.Util.git_repo_name()
+    {org, _} = Circli.Util.git_repo_info()
     print_build_summary({ org, repo, branch })
   end
 
   def print_build_summary({ org, nil, branch }) do
-    {_, repo} = Circli.Util.git_repo_name()
+    {_, repo} = Circli.Util.git_repo_info()
     print_build_summary({ org, repo, branch })
   end
 
@@ -132,8 +132,6 @@ defmodule Circli.Circle2Api do
   end
 
   def print_build_summary(build_info) do
-    IO.inspect build_info
-
     results = build_info
               |> validate_build_info
               |> generate_build_results
@@ -141,9 +139,10 @@ defmodule Circli.Circle2Api do
     unless Enum.empty?(results) do
       border = String.duplicate("-", Enum.max([50, String.length(results[:commit_message]) + 16]))
 
-      { _org, _repo, branch_name } = build_info
+      { org, repo, branch_name } = build_info
       IO.puts ""
       IO.puts(border)
+      IO.puts("          repo: #{org}/#{repo}")
       IO.puts("        branch: #{branch_name}")
       IO.puts("     committed: #{Timex.format!(results[:committed_at], "{relative}", :relative)}")
       IO.puts("        queued: #{Timex.format!(results[:queued_at], "{relative}", :relative)}")

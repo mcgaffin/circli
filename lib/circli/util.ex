@@ -32,9 +32,9 @@ defmodule Circli.Util do
   @doc """
   Prints the base directory of the current git repo.
   """
-  def git_base_dir do
+  def git_config_dir do
     {repo_dir, 0} = System.cmd("git", ["rev-parse", "--absolute-git-dir"])
-    String.replace_suffix(repo_dir, "/.git\n", "")
+    String.trim(repo_dir)
   end
 
   @doc """
@@ -42,15 +42,22 @@ defmodule Circli.Util do
   The result is returned as a tuple with the first element being the organization,
   and the second being the repo name.
 
-      iex> Circli.Util.git_repo_name
+      iex> Circli.Util.git_repo_info
       {"mcgaffin", "circli"}
   """
-  def git_repo_name do
-    fetch_re = ~r/Fetch URL/
-    {repo_data, 0} = System.cmd("git", ["remote", "show", "origin"])
-    fetch_url = String.split(repo_data, "\n")
-                |> Enum.find(fn line -> String.match?(line, fetch_re) end)
-    [_line, organization, repo_name] = Regex.run(~r/Fetch URL.*:(\w+)\/(\w+).git$/, fetch_url)
-    {organization, repo_name}
+  def git_repo_info do
+    {:ok, info} = "#{git_config_dir()}/config"
+    |> File.open([:read], fn f ->
+      IO.read(f, :all)
+      |> String.split("\n")
+      |> Enum.reduce_while("", fn line, acc ->
+        if(String.match?(line, ~r/\[remote "origin"\]/),
+          do: { :cont, :next },
+          else: if(acc == :next, do: { :halt, line }, else: { :cont, "" }))
+      end)
+    end)
+
+    [ _, org, repo ] = Regex.run(~r/url.+:(\w+)\/(\w+).git/, info)
+    { org, repo }
   end
 end
