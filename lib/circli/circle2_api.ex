@@ -106,14 +106,37 @@ defmodule Circli.Circle2Api do
     |> Enum.each(fn r -> IO.puts("⚙️  #{r}") end)
   end
 
+  defp validate_build_info({ organization, repo, branch }) do
+    organization = if(organization == nil or String.length(organization) == 0, do: "bookbub", else: organization)
+    repo = if(repo == nil or String.length(repo) == 0, do: "lello", else: repo)
+    branch = if(branch == nil or String.length(branch) == 0, do: "master", else: branch)
+    { organization, repo, branch }
+  end
+
   def print_build_summary({}) do
-    Circli.Util.git_repo_name
-    |> Tuple.append(Circli.Util.current_branch)
-    |> print_build_summary
+    print_build_summary({ nil, nil, nil })
+  end
+
+  def print_build_summary({ nil, repo, branch }) do
+    {org, _} = Circli.Util.git_repo_name()
+    print_build_summary({ org, repo, branch })
+  end
+
+  def print_build_summary({ org, nil, branch }) do
+    {_, repo} = Circli.Util.git_repo_name()
+    print_build_summary({ org, repo, branch })
+  end
+
+  def print_build_summary({ org, repo, nil }) do
+    print_build_summary({ org, repo, Circli.Util.current_branch() })
   end
 
   def print_build_summary(build_info) do
-    results = generate_build_results(build_info)
+    IO.inspect build_info
+
+    results = build_info
+              |> validate_build_info
+              |> generate_build_results
 
     unless Enum.empty?(results) do
       border = String.duplicate("-", Enum.max([50, String.length(results[:commit_message]) + 16]))

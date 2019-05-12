@@ -25,6 +25,6 @@ defmodule CircliTest do
   end
 
   test "when passed nothing, returns nothing" do
-    assert(parse_args([])) == {}
+    assert(parse_args([]) == {})
   end
 end
