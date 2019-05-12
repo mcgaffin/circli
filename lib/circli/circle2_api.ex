@@ -106,8 +106,9 @@ defmodule Circli.Circle2Api do
     |> Enum.each(fn r -> IO.puts("⚙️  #{r}") end)
   end
 
-  def print_build_summary do
+  def print_build_summary({}) do
     Circli.Util.git_repo_name
+    |> Tuple.append(Circli.Util.current_branch)
     |> print_build_summary
   end
 

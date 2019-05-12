@@ -10,11 +10,21 @@ defmodule CircliTest do
     assert parse_args(["--help", "anything"]) == :help
   end
 
-  test "parses branch name" do
+  test "parses build arguments" do
     assert parse_args([
       "-o", "org-name",
       "-r", "repo-name",
       "-b", "this-is-my-branch-name"
     ]) == { "org-name", "repo-name", "this-is-my-branch-name" }
+
+    assert parse_args([
+      "--organization=org-name",
+      "--repo=repo-name",
+      "--branch=this-is-my-branch-name"
+    ]) == { "org-name", "repo-name", "this-is-my-branch-name" }
+  end
+
+  test "when passed nothing, returns nothing" do
+    assert(parse_args([])) == {}
   end
 end

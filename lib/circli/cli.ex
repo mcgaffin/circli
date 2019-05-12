@@ -43,7 +43,7 @@ defmodule Circli.CLI do
 
     case parse do
       { [ help: true ], _, _ } -> :help
-      { [], _, _} -> :help
+      { [], _, _} -> {}
       { switches, _, _ } -> { switches[:organization], switches[:repo], switches[:branch] }
       _ -> :help
     end
