@@ -1,4 +1,4 @@
-defmodule Circli.CircleApi do
+defmodule Circli.Circle2Api do
   use Timex
 
   def fetch_me do

@@ -19,7 +19,7 @@ defmodule Circli.CLI do
   end
 
   defp process({ branch_name }) do
-    Circli.CircleApi.print_build_summary(branch_name)
+    Circli.Circle2Api.print_build_summary(branch_name)
   end
 
   @doc """
