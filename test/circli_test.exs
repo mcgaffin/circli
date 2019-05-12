@@ -11,6 +11,10 @@ defmodule CircliTest do
   end
 
   test "parses branch name" do
-    assert parse_args(["this-is-my-branch-name"]) == { "this-is-my-branch-name" }
+    assert parse_args([
+      "-o", "org-name",
+      "-r", "repo-name",
+      "-b", "this-is-my-branch-name"
+    ]) == { "org-name", "repo-name", "this-is-my-branch-name" }
   end
 end
