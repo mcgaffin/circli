@@ -17,9 +17,14 @@ defmodule Circli.CLI do
       With no options, circli will detect the current organization, repo, and branch from
       the current git repo and attempt to fetch its Circle build status.
       
-      -o, --organization - the organization that owns the repo
-      -r, --repository -   the git repo that is being built.
-      -b, --branch -       the branch of the git repo that is being built.
+      -o, --organization
+              the organization that owns the repo
+
+      -r, --repository
+              the git repo that is being built.
+
+      -b, --branch
+              branch of the git repo that is being built.
 
       Some combination of options might not make sense. For example:
 
