@@ -39,14 +39,14 @@ defmodule Circli.Circle2Api do
       end)
   end
 
-  defp first_workflow([]) do
+  defp most_recent_workflow([]) do
     IO.puts("")
     IO.puts("There are no builds on this branch yet. Get busy!")
     IO.puts("")
     []
   end
 
-  defp first_workflow(builds) do
+  defp most_recent_workflow(builds) do
     most_recent_build = builds
                         |> Enum.reject(fn build -> build["committer_date"] === nil end)
                         |> Enum.at(0)
@@ -90,20 +90,20 @@ defmodule Circli.Circle2Api do
 
   def generate_build_results(build_info) do 
     build_states = fetch_status(build_info)
-                   |> first_workflow
+                   |> most_recent_workflow
 
     gather_build_info(build_states)
   end
 
   def print_build_messages([]) do
-    IO.puts("✅  build succeeded")
+    IO.puts("√ build succeeded")
   end
 
   def print_build_messages(messages) do
     messages
     |> Enum.uniq
     |> Enum.reverse
-    |> Enum.each(fn r -> IO.puts("⚙️  #{r}") end)
+    |> Enum.each(fn r -> IO.puts("- #{r}") end)
   end
 
   defp validate_build_info({ organization, repo, branch }) do
