@@ -14,6 +14,25 @@ defmodule Circli.CLI do
 
       Usage: circli [-o organization ] [-r repo] [-b branch]
 
+      With no options, circli will detect the current organization, repo, and branch from
+      the current git repo and attempt to fetch its Circle build status.
+      
+      -o, --organization - the organization that owns the repo
+      -r, --repository -   the git repo that is being built.
+      -b, --branch -       the branch of the git repo that is being built.
+
+      Some combination of options might not make sense. For example:
+
+      circli --organization haffaraff
+
+      would imply that the repository and branch also should be specified. It's unlikely 
+      that a non-default organization will also contain the repo and branch provided by 
+      their default values. This would also be likely for:
+
+      circli --repo not-the-current-repo
+
+    
+      So, think about that.
     """
     System.halt(0)
   end
