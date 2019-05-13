@@ -95,11 +95,11 @@ defmodule Circli.Circle2Api do
     gather_build_info(build_states)
   end
 
-  defp print_build_messages([]) do
+  def print_build_messages([]) do
     IO.puts("✅  build succeeded")
   end
 
-  defp print_build_messages(messages) do
+  def print_build_messages(messages) do
     messages
     |> Enum.uniq
     |> Enum.reverse
