@@ -12,7 +12,7 @@ defmodule Circli.Circle2Api do
     me_info
   end
 
-  defp fetch_status({ organization, repo, branch_name }) do
+  def fetch_status({ organization, repo, branch_name }) do
     circle_url = "https://circle2.bubtools.net/api/v1.1/project/github/#{organization}/#{repo}/tree/#{branch_name}"
     circle_token = Application.get_env(:circli, :circle2_api_key)
 
@@ -24,8 +24,12 @@ defmodule Circli.Circle2Api do
       },
       headers: %{accept: "application/json"})
 
-    {_, build_info} = Poison.decode(response.body)
-    build_info
+    request_success = HTTPotion.Response.success?(response)
+    case request_success do
+      true -> {_, build_info} = Poison.decode(response.body)
+        build_info
+      false -> [{ :error, response.message }]
+    end
   end
 
   defp removeSuccessStates(builds) do
@@ -39,14 +43,21 @@ defmodule Circli.Circle2Api do
       end)
   end
 
-  defp most_recent_workflow([]) do
+  def most_recent_workflow([{ :error, message }]) do
+    IO.puts("")
+    IO.puts("There was an error fetching the build status: #{message}")
+    IO.puts("")
+    []
+  end
+
+  def most_recent_workflow([]) do
     IO.puts("")
     IO.puts("There are no builds on this branch yet. Get busy!")
     IO.puts("")
     []
   end
 
-  defp most_recent_workflow(builds) do
+  def most_recent_workflow(builds) do
     most_recent_build = builds
                         |> Enum.reject(fn build -> build["committer_date"] === nil end)
                         |> Enum.at(0)
@@ -89,10 +100,9 @@ defmodule Circli.Circle2Api do
   end
 
   def generate_build_results(build_info) do 
-    build_states = fetch_status(build_info)
-                   |> most_recent_workflow
-
-    gather_build_info(build_states)
+    fetch_status(build_info)
+    |> most_recent_workflow
+    |> gather_build_info
   end
 
   def print_build_messages([]) do
