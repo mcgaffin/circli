@@ -99,21 +99,21 @@ defmodule Circli.Circle2Api do
     }
   end
 
-  def generate_build_results(build_info) do 
+  def generate_build_results(build_info) do
     fetch_status(build_info)
     |> most_recent_workflow
     |> gather_build_info
   end
 
   def print_build_messages([]) do
-    IO.puts("√ build succeeded")
+    IO.puts(Colixir.colorize("√ build succeeded", :green))
   end
 
   def print_build_messages(messages) do
     messages
     |> Enum.uniq
     |> Enum.reverse
-    |> Enum.each(fn r -> IO.puts("- #{r}") end)
+    |> Enum.each(fn r -> IO.puts(Colixir.colorize("- #{r}", if(String.match?(r, ~r/failed$/), do: :red, else: :yellow))) end)
   end
 
   defp validate_build_info({ organization, repo, branch }) do
@@ -121,6 +121,19 @@ defmodule Circli.Circle2Api do
     repo = if(repo == nil or String.length(repo) == 0, do: "lello", else: repo)
     branch = if(branch == nil or String.length(branch) == 0, do: "master", else: branch)
     { organization, repo, branch }
+  end
+
+  def print_headers(headers) do
+    border = String.duplicate("-", 60)
+    max_width = Enum.reduce(headers, 0, fn { label, _value }, acc -> if(String.length(label) > acc, do: String.length(label), else: acc) end)
+
+    IO.puts("")
+    IO.puts(border)
+
+    Enum.each(headers, fn { label, value } -> IO.puts("#{Colixir.colorize(String.pad_leading(label, max_width), :yellow)}: #{value}") end)
+
+    IO.puts(border)
+    IO.puts("")
   end
 
   def print_build_summary({}) do
@@ -147,18 +160,16 @@ defmodule Circli.Circle2Api do
               |> generate_build_results
 
     unless Enum.empty?(results) do
-      border = String.duplicate("-", Enum.max([50, String.length(results[:commit_message]) + 16]))
-
       { org, repo, branch_name } = build_info
-      IO.puts ""
-      IO.puts(border)
-      IO.puts("          repo: #{org}/#{repo}")
-      IO.puts("        branch: #{branch_name}")
-      IO.puts("     committed: #{Timex.format!(results[:committed_at], "{relative}", :relative)}")
-      IO.puts("        queued: #{Timex.format!(results[:queued_at], "{relative}", :relative)}")
-      IO.puts("commit message: #{results[:commit_message]}")
-      IO.puts(border)
-      IO.puts ""
+
+      print_headers([
+        { "repo", "#{org}/#{repo}" },
+        { "branch", branch_name },
+        { "committed", Timex.format!(results[:committed_at], "{relative}", :relative) },
+        { "queued", Timex.format!(results[:queued_at], "{relative}", :relative) },
+        { "commit message", results[:commit_message] }
+      ])
+
       print_build_messages(results[:messages])
       IO.puts ""
     end
