@@ -124,15 +124,10 @@ defmodule Circli.Circle2Api do
   end
 
   def print_headers(headers) do
-    border = String.duplicate("-", 60)
     max_width = Enum.reduce(headers, 0, fn { label, _value }, acc -> if(String.length(label) > acc, do: String.length(label), else: acc) end)
 
     IO.puts("")
-    IO.puts(border)
-
     Enum.each(headers, fn { label, value } -> IO.puts("#{Colixir.colorize(String.pad_leading(label, max_width), :yellow)}: #{value}") end)
-
-    IO.puts(border)
     IO.puts("")
   end
 
