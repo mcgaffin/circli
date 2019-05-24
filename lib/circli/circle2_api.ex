@@ -36,10 +36,21 @@ defmodule Circli.Circle2Api do
     Enum.reject(builds, fn build -> build["status"] == "success" end)
   end
 
+  def status_with_color(status) do
+    colors = %{
+      "running" => :blue,
+      "failed" => :red,
+      "queued" => :cyan,
+    }
+
+    { _, color } = Enum.find(colors, fn { key, _color } -> Regex.compile(key) |> elem(1) |> Regex.match?(status) end)
+    Colixir.colorize(status, color)
+  end
+
   defp gather_build_state_messages(builds) do
     Enum.map(builds,
       fn build ->
-        "#{build["workflows"]["job_name"]}: #{build["status"]}"
+        "#{build["workflows"]["job_name"]}: #{status_with_color(build["status"])}"
       end)
   end
 
@@ -113,7 +124,7 @@ defmodule Circli.Circle2Api do
     messages
     |> Enum.uniq
     |> Enum.reverse
-    |> Enum.each(fn r -> IO.puts(Colixir.colorize("- #{r}", if(String.match?(r, ~r/failed$/), do: :red, else: :yellow))) end)
+    |> Enum.each(fn r -> IO.puts("- #{r}") end)
   end
 
   defp validate_build_info({ organization, repo, branch }) do
