@@ -15,7 +15,7 @@ defmodule Circli.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      applications: [:httpotion, :timex],
+      applications: [:httpotion, :timex, :colixir],
       extra_applications: [:logger]
     ]
   end
@@ -23,6 +23,7 @@ defmodule Circli.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:colixir, "~> 0.0.1"},
       {:httpotion, "~> 3.1.0"},
       {:poison, "~> 3.1"},
       {:timex, "~> 3.1"},

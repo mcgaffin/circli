@@ -36,10 +36,21 @@ defmodule Circli.Circle2Api do
     Enum.reject(builds, fn build -> build["status"] == "success" end)
   end
 
+  def status_with_color(status) do
+    colors = %{
+      "running" => :blue,
+      "failed" => :red,
+      "queued" => :cyan,
+    }
+
+    # { _, color } = Enum.find(colors, fn { key, _color } -> Regex.compile(key) |> elem(1) |> Regex.match?(status) end)
+    Colixir.colorize(status, colors[status])
+  end
+
   defp gather_build_state_messages(builds) do
     Enum.map(builds,
       fn build ->
-        "#{build["workflows"]["job_name"]}: #{build["status"]}"
+        "#{build["workflows"]["job_name"]}: #{status_with_color(build["status"])}"
       end)
   end
 
@@ -99,14 +110,14 @@ defmodule Circli.Circle2Api do
     }
   end
 
-  def generate_build_results(build_info) do 
+  def generate_build_results(build_info) do
     fetch_status(build_info)
     |> most_recent_workflow
     |> gather_build_info
   end
 
   def print_build_messages([]) do
-    IO.puts("√ build succeeded")
+    IO.puts(Colixir.colorize("√ build succeeded", :green))
   end
 
   def print_build_messages(messages) do
@@ -121,6 +132,14 @@ defmodule Circli.Circle2Api do
     repo = if(repo == nil or String.length(repo) == 0, do: "lello", else: repo)
     branch = if(branch == nil or String.length(branch) == 0, do: "master", else: branch)
     { organization, repo, branch }
+  end
+
+  def print_headers(headers) do
+    max_width = Enum.reduce(headers, 0, fn { label, _value }, acc -> if(String.length(label) > acc, do: String.length(label), else: acc) end)
+
+    IO.puts("")
+    Enum.each(headers, fn { label, value } -> IO.puts("#{Colixir.colorize(String.pad_leading(label, max_width), :yellow)}: #{value}") end)
+    IO.puts("")
   end
 
   def print_build_summary({}) do
@@ -147,18 +166,16 @@ defmodule Circli.Circle2Api do
               |> generate_build_results
 
     unless Enum.empty?(results) do
-      border = String.duplicate("-", Enum.max([50, String.length(results[:commit_message]) + 16]))
-
       { org, repo, branch_name } = build_info
-      IO.puts ""
-      IO.puts(border)
-      IO.puts("          repo: #{org}/#{repo}")
-      IO.puts("        branch: #{branch_name}")
-      IO.puts("     committed: #{Timex.format!(results[:committed_at], "{relative}", :relative)}")
-      IO.puts("        queued: #{Timex.format!(results[:queued_at], "{relative}", :relative)}")
-      IO.puts("commit message: #{results[:commit_message]}")
-      IO.puts(border)
-      IO.puts ""
+
+      print_headers([
+        { "repo", "#{org}/#{repo}" },
+        { "branch", branch_name },
+        { "committed", Timex.format!(results[:committed_at], "{relative}", :relative) },
+        { "queued", Timex.format!(results[:queued_at], "{relative}", :relative) },
+        { "commit message", results[:commit_message] }
+      ])
+
       print_build_messages(results[:messages])
       IO.puts ""
     end
