@@ -43,7 +43,6 @@ defmodule Circli.Circle2Api do
       "queued" => :cyan,
     }
 
-    # { _, color } = Enum.find(colors, fn { key, _color } -> Regex.compile(key) |> elem(1) |> Regex.match?(status) end)
     Colixir.colorize(status, colors[status])
   end
 
