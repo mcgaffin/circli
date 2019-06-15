@@ -24,8 +24,7 @@ defmodule Circli.Circle2Api do
       },
       headers: %{accept: "application/json"})
 
-    request_success = HTTPotion.Response.success?(response)
-    case request_success do
+    case HTTPotion.Response.success?(response) do
       true -> {_, build_info} = Poison.decode(response.body)
         build_info
       false -> [{ :error, response.message }]
@@ -134,10 +133,16 @@ defmodule Circli.Circle2Api do
   end
 
   def print_headers(headers) do
-    max_width = Enum.reduce(headers, 0, fn { label, _value }, acc -> if(String.length(label) > acc, do: String.length(label), else: acc) end)
+    max_width = Enum.reduce(headers, 0,
+      fn { label, _value }, acc ->
+        if(String.length(label) > acc, do: String.length(label), else: acc)
+      end)
 
     IO.puts("")
-    Enum.each(headers, fn { label, value } -> IO.puts("#{Colixir.colorize(String.pad_leading(label, max_width), :yellow)}: #{value}") end)
+    Enum.each(headers,
+      fn { label, value } ->
+        IO.puts("#{Colixir.colorize(String.pad_leading(label, max_width), :yellow)}: #{value}")
+      end)
     IO.puts("")
   end
 
