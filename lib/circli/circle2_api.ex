@@ -1,19 +1,9 @@
 defmodule Circli.Circle2Api do
   use Timex
 
-  def fetch_me do
-    circle_url = "https://circle2.bubtools.net/api/v1.1/me"
-    circle_token = Application.get_env(:circli, :circle2_api_key)
-    response = HTTPotion.get(circle_url,
-      query: %{"circle-token" => circle_token},
-      headers: %{accept: "application/json"})
-
-    {_, me_info} = Poison.decode(response.body)
-    me_info
-  end
-
   def fetch_status({ organization, repo, branch_name }) do
-    circle_url = "https://circle2.bubtools.net/api/v1.1/project/github/#{organization}/#{repo}/tree/#{branch_name}"
+    circle_url_base = Application.get_env(:circli, :circle2_api_url)
+    circle_url = "#{circle_url_base}/#{organization}/#{repo}/tree/#{branch_name}"
     circle_token = Application.get_env(:circli, :circle2_api_key)
 
     response = HTTPotion.get(circle_url,
