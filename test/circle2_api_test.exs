@@ -10,7 +10,7 @@ defmodule Circle2ApiTest do
       assert print_build_messages([]) === :ok
     end
 
-    assert capture_io(fun) == "√ build succeeded\n"
+    assert capture_io(fun) == "\e[32m√ build succeeded\e[0m\n"
   end
 
   test "returns empty array and prints message if no builds were found" do
