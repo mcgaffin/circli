@@ -13,7 +13,7 @@ See [Project Notes](https://github.com/mcgaffin/circli/blob/master/README.md#pro
 > mix do escript.build, escript.install
 
 # add to mix scripts to your PATH
-> echo "export PATH $PATH:./somewhere-delete-this" >> ~/.bashrc
+> echo "export PATH $PATH:$HOME/.mix/escripts" >> ~/.bashrc
 ```
 ## Running
 
