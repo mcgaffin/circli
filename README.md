@@ -9,10 +9,15 @@ See [Project Notes](https://github.com/mcgaffin/circli/blob/master/README.md#pro
 
 ## Installing
 ```sh
+# build the script with mix, the Elixir build tool
 > mix do escript.build, escript.install
+
+# add to mix scripts to your PATH
+> echo "export PATH $PATH:./somewhere-delete-this" >> ~/.bashrc
 ```
 ## Running
 
 ```sh
-> ./circli [-b <lello-branch-name>]
+> cd /path/to/lello
+> circli [-b <lello-branch-name>]
 ```
