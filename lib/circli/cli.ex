@@ -26,6 +26,10 @@ defmodule Circli.CLI do
       -b, --branch
               branch of the git repo that is being built.
 
+      -s, --status-line
+              display minimal summary information about the workspace build:
+                   # builds-running / # builds-failed
+
       Some combination of options might not make sense. For example:
 
       circli --organization haffaraff
@@ -58,17 +62,24 @@ defmodule Circli.CLI do
       organization: :string,
       repo: :string,
       branch: :string,
+      status_bar: :boolean,
     ], aliases: [
       h: :help,
       o: :organization,
       r: :repo,
       b: :branch,
+      s: :status_bar,
     ])
 
     case parse do
       { [ help: true ], _, _ } -> :help
       { [], _, _} -> {}
-      { switches, _, _ } -> { switches[:organization], switches[:repo], switches[:branch] }
+      { switches, _, _ } -> {
+          switches[:organization],
+          switches[:repo],
+          switches[:branch],
+          switches[:status_bar],
+      }
       _ -> :help
     end
   end
