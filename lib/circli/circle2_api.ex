@@ -146,8 +146,8 @@ defmodule Circli.Circle2Api do
       {_, acc} = Map.get_and_update(acc, state, fn count -> {count, (count || 0) + 1} end)
       acc
     end)
-    |> Enum.reduce("", fn { state, count }, acc -> "#{acc} #{state}: #{count} / " end)
-    |> String.trim(" / ")
+    |> Enum.reduce("", fn { state, count }, acc -> "#{acc} #{state}: #{count} /" end)
+    |> String.trim(" /")
     |> IO.puts
   end
 
